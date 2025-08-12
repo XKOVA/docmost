@@ -66,28 +66,29 @@ export class StaticModule implements OnModuleInit {
 
       const RENDER_PATH = '*';
 
-      // Add specific redirect for root path BEFORE registering static files
-      app.get('/', async (req: any, res: any) => {
-        try {
-          // Try to get workspace and check for default landing page
-          const workspace = await this.getWorkspaceForRequest(req);
-          if (workspace?.defaultLandingPage) {
-            return res.redirect(302, workspace.defaultLandingPage);
-          }
-        } catch (err) {
-          // Fallback if workspace lookup fails
-        }
-
-        // Default fallback - redirect to login
-        res.redirect(302, '/login');
-      });
-
       await app.register(fastifyStatic, {
         root: clientDistPath,
         wildcard: false,
       });
 
-      app.get(RENDER_PATH, (req: any, res: any) => {
+      app.get(RENDER_PATH, async (req: any, res: any) => {
+        // Handle root path redirect
+        if (req.url === '/') {
+          try {
+            // Try to get workspace and check for default landing page
+            const workspace = await this.getWorkspaceForRequest(req);
+            if (workspace?.defaultLandingPage) {
+              return res.redirect(302, workspace.defaultLandingPage);
+            }
+          } catch (err) {
+            // Fallback if workspace lookup fails
+          }
+
+          // Default fallback - redirect to login
+          return res.redirect(302, '/login');
+        }
+
+        // For all other routes, serve the SPA
         const stream = fs.createReadStream(indexFilePath);
         res.type('text/html').send(stream);
       });
