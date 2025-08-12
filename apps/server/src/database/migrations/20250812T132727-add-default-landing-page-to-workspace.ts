@@ -1,17 +1,11 @@
-import { Kysely } from 'kysely';
+import { Kysely, sql } from 'kysely';
 
 export async function up(db: Kysely<any>): Promise<void> {
-  try {
-    await db.schema
-      .alterTable('workspaces')
-      .addColumn('default_landing_page', 'varchar', (col) => col)
-      .execute();
-  } catch (error: any) {
-    // Ignore error if column already exists (PostgreSQL error code 42701)
-    if (error.code !== '42701') {
-      throw error;
-    }
-  }
+  // Use raw SQL with IF NOT EXISTS to avoid transaction issues
+  await sql`
+    ALTER TABLE workspaces 
+    ADD COLUMN IF NOT EXISTS default_landing_page VARCHAR
+  `.execute(db);
 }
 
 export async function down(db: Kysely<any>): Promise<void> {
