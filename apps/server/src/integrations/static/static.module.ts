@@ -4,12 +4,14 @@ import { join } from 'path';
 import * as fs from 'node:fs';
 import fastifyStatic from '@fastify/static';
 import { EnvironmentService } from '../environment/environment.service';
+import { WorkspaceRepo } from '@docmost/db/repos/workspace/workspace.repo';
 
 @Module({})
 export class StaticModule implements OnModuleInit {
   constructor(
     private readonly httpAdapterHost: HttpAdapterHost,
     private readonly environmentService: EnvironmentService,
+    private readonly workspaceRepo: WorkspaceRepo,
   ) {}
 
   public async onModuleInit() {
@@ -69,9 +71,20 @@ export class StaticModule implements OnModuleInit {
         wildcard: false,
       });
 
-      // Add specific redirect for root path
-      app.get('/', (req: any, res: any) => {
-        res.redirect(302, '/share/98brmvx4vl/p/xkova-docs-copRp6MrXg');
+      // Add specific redirect for root path  
+      app.get('/', async (req: any, res: any) => {
+        try {
+          // Try to get workspace and check for default landing page
+          const workspace = await this.getWorkspaceForRequest(req);
+          if (workspace?.defaultLandingPage) {
+            return res.redirect(302, workspace.defaultLandingPage);
+          }
+        } catch (err) {
+          // Fallback if workspace lookup fails
+        }
+        
+        // Default fallback - redirect to login
+        res.redirect(302, '/login');
       });
 
       app.get(RENDER_PATH, (req: any, res: any) => {
@@ -79,5 +92,16 @@ export class StaticModule implements OnModuleInit {
         res.type('text/html').send(stream);
       });
     }
+  }
+
+  private async getWorkspaceForRequest(req: any) {
+    if (this.environmentService.isSelfHosted()) {
+      return await this.workspaceRepo.findFirst();
+    } else if (this.environmentService.isCloud()) {
+      const header = req.headers.host;
+      const subdomain = header.split('.')[0];
+      return await this.workspaceRepo.findByHostname(subdomain);
+    }
+    return null;
   }
 }
