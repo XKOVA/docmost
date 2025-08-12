@@ -36,7 +36,7 @@ import {
 } from "@/features/search/components/search-control.tsx";
 import { ShareSearchSpotlight } from "@/features/search/share-search-spotlight";
 import { shareSearchSpotlight } from "@/features/search/constants";
-import ShareBranding from '@/features/share/components/share-branding.tsx';
+
 
 const MemoizedSharedTree = React.memo(SharedTree);
 
@@ -62,7 +62,7 @@ export default function ShareShell({
 
   return (
     <AppShell
-      header={{ height: 50 }}
+      header={{ height: 60 }}
       {...(data?.pageTree?.length > 1 && {
         navbar: {
           width: 300,
@@ -83,7 +83,7 @@ export default function ShareShell({
       }}
       padding="md"
     >
-      <AppShell.Header>
+      <AppShell.Header pb={10}>
         <Group wrap="nowrap" justify="space-between" py="sm" px="xl">
           <Group wrap="nowrap">
             {data?.pageTree?.length > 1 && (
@@ -109,7 +109,16 @@ export default function ShareShell({
                 </Tooltip>
               </>
             )}
+            <img
+              src="https://assets.xkova.com/branding/2025/XKOVA_Word_BrandBlue_v1.png"
+              alt="XKOVA"
+              style={{ maxHeight: "25px", height: "25px" }}
+            />
           </Group>
+
+
+
+
 
           {shareId && (
             <Group visibleFrom="sm">
@@ -164,7 +173,7 @@ export default function ShareShell({
       <AppShell.Main>
         {children}
 
-        {data && shareId && !data.hasLicenseKey && <ShareBranding />}
+
       </AppShell.Main>
 
       <AppShell.Aside

@@ -35,6 +35,7 @@ import SpacesPage from "@/pages/spaces/spaces.tsx";
 import { MfaChallengePage } from "@/ee/mfa/pages/mfa-challenge-page";
 import { MfaSetupRequiredPage } from "@/ee/mfa/pages/mfa-setup-required-page";
 import SpaceTrash from "@/pages/space/space-trash.tsx";
+import RootRedirect from "@/components/root-redirect.tsx";
 
 export default function App() {
   const { t } = useTranslation();
@@ -44,7 +45,7 @@ export default function App() {
   return (
     <>
       <Routes>
-        <Route index element={<Navigate to="/home" />} />
+        <Route index element={<RootRedirect />} />
         <Route path={"/login"} element={<LoginPage />} />
         <Route path={"/invites/:invitationId"} element={<InviteSignup />} />
         <Route path={"/forgot-password"} element={<ForgotPassword />} />

@@ -68,19 +68,11 @@ export function AppHeader() {
             <img
               src="https://assets.xkova.com/branding/2025/XKOVA_Word_BrandBlue_v1.png"
               alt="XKOVA"
-              style={{ maxHeight: "50px", height: "auto" }}
+              style={{ maxHeight: "25px", height: "25px" }}
             />
           )}
 
-          <Text
-            size="lg"
-            fw={600}
-            style={{ cursor: "pointer", userSelect: "none" }}
-            component={Link}
-            to="/home"
-          >
-            Docmost
-          </Text>
+
 
           <Group ml={50} gap={5} className={classes.links} visibleFrom="sm">
             {items}
