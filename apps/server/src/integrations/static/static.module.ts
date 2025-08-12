@@ -5,14 +5,21 @@ import * as fs from 'node:fs';
 import fastifyStatic from '@fastify/static';
 import { EnvironmentService } from '../environment/environment.service';
 import { WorkspaceRepo } from '@docmost/db/repos/workspace/workspace.repo';
+import { EnvironmentModule } from '../environment/environment.module';
+import { DatabaseModule } from '@docmost/db/database.module';
 
-@Module({})
+@Module({
+  imports: [EnvironmentModule, DatabaseModule],
+  providers: [EnvironmentService, WorkspaceRepo],
+})
 export class StaticModule implements OnModuleInit {
   constructor(
     private readonly httpAdapterHost: HttpAdapterHost,
     private readonly environmentService: EnvironmentService,
     private readonly workspaceRepo: WorkspaceRepo,
-  ) {}
+  ) {
+    console.log('=== STATIC MODULE CONSTRUCTOR CALLED ===');
+  }
 
   public async onModuleInit() {
     const httpAdapter = this.httpAdapterHost.httpAdapter;
@@ -70,21 +77,30 @@ export class StaticModule implements OnModuleInit {
 
       const RENDER_PATH = '*';
 
+      console.log('=== STATIC MODULE INITIALIZATION ===');
+      console.log('Client dist path:', clientDistPath);
+      console.log('Index file path:', indexFilePath);
+      console.log('Registering static files...');
+
       await app.register(fastifyStatic, {
         root: clientDistPath,
         wildcard: false,
       });
 
+      console.log('Registering catch-all route:', RENDER_PATH);
       app.get(RENDER_PATH, async (req: any, res: any) => {
+        console.log('=== ROUTE HANDLER CALLED ===');
+        console.log('Request URL:', req.url);
+        console.log('Request method:', req.method);
+
         // Skip static assets (CSS, JS, images, etc.)
         if (
           req.url.startsWith('/assets/') ||
-          req.url.endsWith('.js') ||
-          req.url.endsWith('.css') ||
-          req.url.endsWith('.png') ||
-          req.url.endsWith('.ico') ||
-          req.url.endsWith('.svg')
+          req.url.match(
+            /\.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot|map)$/,
+          )
         ) {
+          console.log('Skipping static asset:', req.url);
           // Let fastify-static handle these
           return res.callNotFound();
         }
@@ -113,6 +129,7 @@ export class StaticModule implements OnModuleInit {
         }
 
         // For all other routes, serve the SPA
+        console.log('Serving SPA for route:', req.url);
         const stream = fs.createReadStream(indexFilePath);
         res.type('text/html').send(stream);
       });
