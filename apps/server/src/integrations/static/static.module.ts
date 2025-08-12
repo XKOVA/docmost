@@ -147,8 +147,8 @@ export class StaticModule implements OnModuleInit {
 
           // No default landing page set - serve the normal SPA (which will handle routing)
           console.log('No default landing page set, serving normal SPA');
-          const stream = fs.createReadStream(indexFilePath);
-          return res.type('text/html').send(stream);
+          const htmlContent = fs.readFileSync(indexFilePath, 'utf8');
+          return res.type('text/html').send(htmlContent);
         }
 
         // For all other routes, serve the SPA
@@ -169,8 +169,8 @@ export class StaticModule implements OnModuleInit {
           console.log('ERROR: Index file does not exist at:', indexFilePath);
         }
 
-        const stream = fs.createReadStream(indexFilePath);
-        res.type('text/html').send(stream);
+        const htmlContent = fs.readFileSync(indexFilePath, 'utf8');
+        res.type('text/html').send(htmlContent);
       });
     }
   }
