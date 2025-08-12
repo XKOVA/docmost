@@ -100,7 +100,11 @@ export class StaticModule implements OnModuleInit {
             /\.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot|map)$/,
           )
         ) {
-          console.log('Skipping static asset:', req.url);
+          console.log(
+            'Skipping static asset:',
+            req.url,
+            '- letting fastify-static handle it',
+          );
           // Let fastify-static handle these
           return res.callNotFound();
         }
@@ -130,6 +134,22 @@ export class StaticModule implements OnModuleInit {
 
         // For all other routes, serve the SPA
         console.log('Serving SPA for route:', req.url);
+
+        // Debug: Check if index.html exists and log its size
+        if (fs.existsSync(indexFilePath)) {
+          const stats = fs.statSync(indexFilePath);
+          console.log('Index file exists, size:', stats.size, 'bytes');
+
+          // Log first 500 characters of the HTML to see if it's valid
+          const htmlContent = fs.readFileSync(indexFilePath, 'utf8');
+          console.log(
+            'HTML preview (first 500 chars):',
+            htmlContent.substring(0, 500),
+          );
+        } else {
+          console.log('ERROR: Index file does not exist at:', indexFilePath);
+        }
+
         const stream = fs.createReadStream(indexFilePath);
         res.type('text/html').send(stream);
       });
