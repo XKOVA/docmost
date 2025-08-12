@@ -7,7 +7,7 @@ import { z } from "zod";
 import { notifications } from "@mantine/notifications";
 import { workspaceAtom } from "@/features/user/atoms/current-user-atom.ts";
 import { updateWorkspace } from "@/features/workspace/services/workspace-service";
-import { useUserRole } from "@/features/user/hooks/use-user-role";
+import { useUserRole } from "@/hooks/use-user-role";
 import { IWorkspace } from "@/features/workspace/types/workspace.types";
 
 const formSchema = z.object({
