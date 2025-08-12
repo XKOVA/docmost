@@ -22,6 +22,11 @@ export default function DefaultLandingPageForm() {
     const [workspace, setWorkspace] = useAtom(workspaceAtom);
     const { isAdmin } = useUserRole();
 
+    // Don't render if the feature is not available (migration not applied)
+    if (workspace && !('defaultLandingPage' in workspace)) {
+        return null;
+    }
+
     const form = useForm<FormValues>({
         validate: zodResolver(formSchema),
         initialValues: {
