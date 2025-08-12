@@ -28,11 +28,7 @@ export default function SetupWorkspace() {
     return <div></div>;
   }
 
-  if (
-    isError &&
-    error?.["response"]?.status === 404 &&
-    error?.["response"]?.data.message.includes("Workspace not found")
-  ) {
+  if (isError && error?.["response"]?.status === 404) {
     return (
       <>
         <Helmet>
