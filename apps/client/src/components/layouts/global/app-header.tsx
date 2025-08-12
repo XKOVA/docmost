@@ -64,6 +64,14 @@ export function AppHeader() {
             </>
           )}
 
+          {hideSidebar && (
+            <img
+              src="https://assets.xkova.com/branding/2025/XKOVA_Word_BrandBlue_v1.png"
+              alt="XKOVA"
+              style={{ maxHeight: "50px", height: "auto" }}
+            />
+          )}
+
           <Text
             size="lg"
             fw={600}

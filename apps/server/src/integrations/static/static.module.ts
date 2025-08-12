@@ -80,14 +80,33 @@ export class StaticModule implements OnModuleInit {
       console.log('=== STATIC MODULE INITIALIZATION ===');
       console.log('Client dist path:', clientDistPath);
       console.log('Index file path:', indexFilePath);
+
+      // Debug: List all files in the assets directory
+      const assetsPath = join(clientDistPath, 'assets');
+      if (fs.existsSync(assetsPath)) {
+        const assetFiles = fs.readdirSync(assetsPath);
+        console.log('Assets directory contents:', assetFiles);
+      } else {
+        console.log('ERROR: Assets directory does not exist at:', assetsPath);
+      }
+
+      // Add a hook to log ALL requests before they're processed
+      app.addHook('onRequest', async (request: any, reply: any) => {
+        console.log('=== INCOMING REQUEST ===', request.method, request.url);
+      });
+
       console.log('Registering static files...');
 
+      // Register static file serving for assets
       await app.register(fastifyStatic, {
         root: clientDistPath,
+        prefix: '/', // Serve files from root path
         wildcard: false,
+        decorateReply: false, // Prevent conflicts with multiple registrations
       });
 
       console.log('Registering catch-all route:', RENDER_PATH);
+
       app.get(RENDER_PATH, async (req: any, res: any) => {
         console.log('=== ROUTE HANDLER CALLED ===');
         console.log('Request URL:', req.url);
