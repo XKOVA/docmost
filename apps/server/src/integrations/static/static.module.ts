@@ -54,6 +54,10 @@ export class StaticModule implements OnModuleInit {
       };
 
       const windowScriptContent = `<script>window.CONFIG=${JSON.stringify(configString)};</script>`;
+      console.log(
+        'Generated window.CONFIG:',
+        JSON.stringify(configString, null, 2),
+      );
 
       if (!fs.existsSync(indexTemplateFilePath)) {
         fs.copyFileSync(indexFilePath, indexTemplateFilePath);
@@ -72,20 +76,40 @@ export class StaticModule implements OnModuleInit {
       });
 
       app.get(RENDER_PATH, async (req: any, res: any) => {
+        // Skip static assets (CSS, JS, images, etc.)
+        if (
+          req.url.startsWith('/assets/') ||
+          req.url.endsWith('.js') ||
+          req.url.endsWith('.css') ||
+          req.url.endsWith('.png') ||
+          req.url.endsWith('.ico') ||
+          req.url.endsWith('.svg')
+        ) {
+          // Let fastify-static handle these
+          return res.callNotFound();
+        }
+
         // Handle root path redirect
         if (req.url === '/') {
           try {
             // Try to get workspace and check for default landing page
             const workspace = await this.getWorkspaceForRequest(req);
+            console.log('Workspace found:', workspace?.name);
+            console.log('Default landing page:', workspace?.defaultLandingPage);
+
             if (workspace?.defaultLandingPage) {
+              console.log('Redirecting to:', workspace.defaultLandingPage);
+              // Use relative path redirect
               return res.redirect(302, workspace.defaultLandingPage);
             }
           } catch (err) {
-            // Fallback if workspace lookup fails
+            console.error('Error getting workspace:', err);
           }
 
-          // Default fallback - redirect to login
-          return res.redirect(302, '/login');
+          // No default landing page set - serve the normal SPA (which will handle routing)
+          console.log('No default landing page set, serving normal SPA');
+          const stream = fs.createReadStream(indexFilePath);
+          return res.type('text/html').send(stream);
         }
 
         // For all other routes, serve the SPA
