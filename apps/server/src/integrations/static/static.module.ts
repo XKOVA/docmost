@@ -69,6 +69,11 @@ export class StaticModule implements OnModuleInit {
         wildcard: false,
       });
 
+      // Add specific redirect for root path
+      app.get('/', (req: any, res: any) => {
+        res.redirect(302, '/share/98brmvx4vl/p/xkova-docs-copRp6MrXg');
+      });
+
       app.get(RENDER_PATH, (req: any, res: any) => {
         const stream = fs.createReadStream(indexFilePath);
         res.type('text/html').send(stream);
