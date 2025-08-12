@@ -14,7 +14,6 @@ import AccountPreferences from "@/pages/settings/account/account-preferences.tsx
 import SpaceHome from "@/pages/space/space-home.tsx";
 import PageRedirect from "@/pages/page/page-redirect.tsx";
 import Layout from "@/components/layouts/global/layout.tsx";
-import LandingPageRedirect from "@/components/landing-page-redirect.tsx";
 import { ErrorBoundary } from "react-error-boundary";
 import InviteSignup from "@/pages/auth/invite-signup.tsx";
 import ForgotPassword from "@/pages/auth/forgot-password.tsx";
@@ -45,9 +44,7 @@ export default function App() {
   return (
     <>
       <Routes>
-        <Route element={<Layout />}>
-          <Route index element={<LandingPageRedirect />} />
-        </Route>
+        <Route index element={<Navigate to="/home" />} />
         <Route path={"/login"} element={<LoginPage />} />
         <Route path={"/invites/:invitationId"} element={<InviteSignup />} />
         <Route path={"/forgot-password"} element={<ForgotPassword />} />
