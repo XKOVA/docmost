@@ -3,6 +3,7 @@ version: '3'
 services:
   docmost:
     image: docmost/docmost:latest
+    npm run migration:up
     depends_on:
       - db
       - redis

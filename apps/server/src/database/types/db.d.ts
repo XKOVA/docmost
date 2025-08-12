@@ -311,6 +311,7 @@ export interface Workspaces {
   billingEmail: string | null;
   createdAt: Generated<Timestamp>;
   customDomain: string | null;
+  defaultLandingPage: string | null;
   defaultRole: Generated<string>;
   defaultSpaceId: string | null;
   deletedAt: Timestamp | null;

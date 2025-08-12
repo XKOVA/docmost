@@ -19,6 +19,7 @@ export class WorkspaceRepo {
     'logo',
     'hostname',
     'customDomain',
+    'defaultLandingPage',
     'settings',
     'defaultRole',
     'emailDomains',
