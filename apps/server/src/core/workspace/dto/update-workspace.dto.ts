@@ -18,4 +18,8 @@ export class UpdateWorkspaceDto extends PartialType(CreateWorkspaceDto) {
   @IsOptional()
   @IsBoolean()
   enforceMfa: boolean;
+
+  @IsOptional()
+  @IsString()
+  defaultLandingPage: string;
 }

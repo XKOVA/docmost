@@ -22,6 +22,7 @@ export interface IWorkspace {
   plan?: string;
   hasLicenseKey?: boolean;
   enforceMfa?: boolean;
+  defaultLandingPage?: string;
 }
 
 export interface ICreateInvite {
