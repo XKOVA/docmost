@@ -66,12 +66,7 @@ export class StaticModule implements OnModuleInit {
 
       const RENDER_PATH = '*';
 
-      await app.register(fastifyStatic, {
-        root: clientDistPath,
-        wildcard: false,
-      });
-
-      // Add specific redirect for root path  
+      // Add specific redirect for root path BEFORE registering static files
       app.get('/', async (req: any, res: any) => {
         try {
           // Try to get workspace and check for default landing page
@@ -82,9 +77,14 @@ export class StaticModule implements OnModuleInit {
         } catch (err) {
           // Fallback if workspace lookup fails
         }
-        
+
         // Default fallback - redirect to login
         res.redirect(302, '/login');
+      });
+
+      await app.register(fastifyStatic, {
+        root: clientDistPath,
+        wildcard: false,
       });
 
       app.get(RENDER_PATH, (req: any, res: any) => {
