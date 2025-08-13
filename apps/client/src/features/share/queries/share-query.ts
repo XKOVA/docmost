@@ -170,7 +170,7 @@ export function useGetSharedPageTreeQuery(
   shareId: string,
 ): UseQueryResult<ISharedPageTree, Error> {
   return useQuery({
-    queryKey: ['shared-page-tree', shareId],
+    queryKey: ['shared-page-tree', shareId, 'v2'], // Added version to bust existing cache
     queryFn: () => getSharedPageTree(shareId),
     enabled: !!shareId,
     staleTime: 5 * 60 * 1000, // Reduced to 5 minutes
