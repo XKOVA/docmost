@@ -399,6 +399,7 @@ export class PageRepo {
           ])
           .$if(opts?.includeContent, (qb) => qb.select('content'))
           .where('id', '=', parentPageId)
+          .where('deletedAt', 'is', null) // Filter out deleted pages
           .unionAll((exp) =>
             exp
               .selectFrom('pages as p')
@@ -413,6 +414,7 @@ export class PageRepo {
                 'p.workspaceId',
               ])
               .$if(opts?.includeContent, (qb) => qb.select('p.content'))
+              .where('p.deletedAt', 'is', null) // Filter out deleted pages
               .innerJoin('page_hierarchy as ph', 'p.parentPageId', 'ph.id'),
           ),
       )
