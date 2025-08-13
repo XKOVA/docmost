@@ -1,54 +1,58 @@
-import React from "react";
-import { socketAtom } from "@/features/websocket/atoms/socket-atom.ts";
-import { useAtom } from "jotai";
-import { InfiniteData, useQueryClient } from "@tanstack/react-query";
-import { WebSocketEvent } from "@/features/websocket/types";
-import { IPage } from "../page/types/page.types";
-import { IPagination } from "@/lib/types";
+import React from 'react';
+import { socketAtom } from '@/features/websocket/atoms/socket-atom.ts';
+import { useAtom } from 'jotai';
+import { InfiniteData, useQueryClient } from '@tanstack/react-query';
+import { WebSocketEvent } from '@/features/websocket/types';
+import { IPage } from '../page/types/page.types';
+import { IPagination } from '@/lib/types';
 import {
   invalidateOnCreatePage,
   invalidateOnDeletePage,
   invalidateOnMovePage,
   invalidateOnUpdatePage,
-} from "../page/queries/page-query";
-import { RQ_KEY } from "../comment/queries/comment-query";
-import { queryClient } from "@/main.tsx";
-import { IComment } from "@/features/comment/types/comment.types";
+} from '../page/queries/page-query';
+import { RQ_KEY } from '../comment/queries/comment-query';
+import { queryClient } from '@/main.tsx';
+import { IComment } from '@/features/comment/types/comment.types';
 
 export const useQuerySubscription = () => {
   const queryClient = useQueryClient();
   const [socket] = useAtom(socketAtom);
 
   React.useEffect(() => {
-    socket?.on("message", (event) => {
+    socket?.on('message', (event) => {
       const data: WebSocketEvent = event;
 
       let entity = null;
       let queryKeyId = null;
 
       switch (data.operation) {
-        case "invalidate":
+        case 'invalidate':
           queryClient.invalidateQueries({
             queryKey: [...data.entity, data.id].filter(Boolean),
           });
           break;
-        case "invalidateComment":
+        case 'invalidateComment':
           queryClient.invalidateQueries({
             queryKey: RQ_KEY(data.pageId),
           });
           break;
-        case "addTreeNode":
+        case 'addTreeNode':
           invalidateOnCreatePage(data.payload.data);
           break;
-        case "moveTreeNode":
+        case 'moveTreeNode':
           invalidateOnMovePage();
           break;
-        case "deleteTreeNode":
+        case 'deleteTreeNode':
           invalidateOnDeletePage(data.payload.node.id);
+          // Also invalidate shared page trees for real-time updates to unauthenticated users
+          queryClient.invalidateQueries({
+            predicate: (query) => query.queryKey[0] === 'shared-page-tree',
+          });
           break;
-        case "updateOne":
+        case 'updateOne':
           entity = data.entity[0];
-          if (entity === "pages") {
+          if (entity === 'pages') {
             // we have to do this because the usePageQuery cache key is the slugId.
             queryKeyId = data.payload.slugId;
           } else {
@@ -63,7 +67,7 @@ export const useQuerySubscription = () => {
             });
           }
 
-          if (entity === "pages") {
+          if (entity === 'pages') {
             invalidateOnUpdatePage(
               data.spaceId,
               data.payload.parentPageId,
@@ -86,18 +90,18 @@ export const useQuerySubscription = () => {
           );
       */
           break;
-        case "refetchRootTreeNodeEvent": {
+        case 'refetchRootTreeNodeEvent': {
           const spaceId = data.spaceId;
           queryClient.refetchQueries({
-            queryKey: ["root-sidebar-pages", spaceId],
+            queryKey: ['root-sidebar-pages', spaceId],
           });
 
           queryClient.invalidateQueries({
-            queryKey: ["recent-changes", spaceId],
+            queryKey: ['recent-changes', spaceId],
           });
           break;
         }
-        case "resolveComment": {
+        case 'resolveComment': {
           const currentComments = queryClient.getQueryData(
             RQ_KEY(data.pageId),
           ) as IPagination<IComment>;
@@ -105,15 +109,15 @@ export const useQuerySubscription = () => {
           if (currentComments && currentComments.items) {
             const updatedComments = currentComments.items.map((comment) =>
               comment.id === data.commentId
-                ? { 
-                    ...comment, 
-                    resolvedAt: data.resolvedAt, 
-                    resolvedById: data.resolvedById, 
-                    resolvedBy: data.resolvedBy 
+                ? {
+                    ...comment,
+                    resolvedAt: data.resolvedAt,
+                    resolvedById: data.resolvedById,
+                    resolvedBy: data.resolvedBy,
                   }
                 : comment,
             );
-            
+
             queryClient.setQueryData(RQ_KEY(data.pageId), {
               ...currentComments,
               items: updatedComments,

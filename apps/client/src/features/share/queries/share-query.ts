@@ -4,9 +4,9 @@ import {
   useQuery,
   useQueryClient,
   UseQueryResult,
-} from "@tanstack/react-query";
-import { notifications } from "@mantine/notifications";
-import { useTranslation } from "react-i18next";
+} from '@tanstack/react-query';
+import { notifications } from '@mantine/notifications';
+import { useTranslation } from 'react-i18next';
 import {
   ICreateShare,
   IShare,
@@ -16,7 +16,7 @@ import {
   IShareForPage,
   IShareInfoInput,
   IUpdateShare,
-} from "@/features/share/types/share.types.ts";
+} from '@/features/share/types/share.types.ts';
 import {
   createShare,
   deleteShare,
@@ -26,16 +26,16 @@ import {
   getSharePageInfo,
   getShares,
   updateShare,
-} from "@/features/share/services/share-service.ts";
-import { IPage } from "@/features/page/types/page.types.ts";
-import { IPagination, QueryParams } from "@/lib/types.ts";
-import { useEffect } from "react";
+} from '@/features/share/services/share-service.ts';
+import { IPage } from '@/features/page/types/page.types.ts';
+import { IPagination, QueryParams } from '@/lib/types.ts';
+import { useEffect } from 'react';
 
 export function useGetSharesQuery(
   params?: QueryParams,
 ): UseQueryResult<IPagination<ISharedItem>, Error> {
   return useQuery({
-    queryKey: ["share-list"],
+    queryKey: ['share-list'],
     queryFn: () => getShares(params),
     placeholderData: keepPreviousData,
   });
@@ -45,7 +45,7 @@ export function useGetShareByIdQuery(
   shareId: string,
 ): UseQueryResult<IShare, Error> {
   const query = useQuery({
-    queryKey: ["share-by-id", shareId],
+    queryKey: ['share-by-id', shareId],
     queryFn: () => getShareInfo(shareId),
     enabled: !!shareId,
   });
@@ -57,7 +57,7 @@ export function useSharePageQuery(
   shareInput: Partial<IShareInfoInput>,
 ): UseQueryResult<ISharedPage, Error> {
   const query = useQuery({
-    queryKey: ["shares", shareInput],
+    queryKey: ['shares', shareInput],
     queryFn: () => getSharePageInfo(shareInput),
     enabled: !!shareInput.pageId,
   });
@@ -69,7 +69,7 @@ export function useShareForPageQuery(
   pageId: string,
 ): UseQueryResult<IShareForPage, Error> {
   const query = useQuery({
-    queryKey: ["share-for-page", pageId],
+    queryKey: ['share-for-page', pageId],
     queryFn: () => getShareForPage(pageId),
     enabled: !!pageId,
     staleTime: 0,
@@ -88,11 +88,11 @@ export function useCreateShareMutation() {
     onSuccess: (data) => {
       queryClient.invalidateQueries({
         predicate: (item) =>
-          ["share-for-page", "share-list"].includes(item.queryKey[0] as string),
+          ['share-for-page', 'share-list'].includes(item.queryKey[0] as string),
       });
     },
     onError: (error) => {
-      notifications.show({ message: t("Failed to share page"), color: "red" });
+      notifications.show({ message: t('Failed to share page'), color: 'red' });
     },
   });
 }
@@ -106,26 +106,26 @@ export function useUpdateShareMutation() {
     onSuccess: (data) => {
       queryClient.invalidateQueries({
         predicate: (item) =>
-          ["share-for-page", "share-list"].includes(item.queryKey[0] as string),
+          ['share-for-page', 'share-list'].includes(item.queryKey[0] as string),
       });
     },
     onError: (error, params) => {
-      if (error?.["status"] === 404) {
+      if (error?.['status'] === 404) {
         queryClient.removeQueries({
           predicate: (item) =>
-            ["share-for-page"].includes(item.queryKey[0] as string),
+            ['share-for-page'].includes(item.queryKey[0] as string),
         });
 
         notifications.show({
-          message: t("Share not found"),
-          color: "red",
+          message: t('Share not found'),
+          color: 'red',
         });
         return;
       }
 
       notifications.show({
-        message: error?.["response"]?.data?.message || "Share not found",
-        color: "red",
+        message: error?.['response']?.data?.message || 'Share not found',
+        color: 'red',
       });
     },
   });
@@ -140,27 +140,27 @@ export function useDeleteShareMutation() {
     onSuccess: (data) => {
       queryClient.removeQueries({
         predicate: (item) =>
-          ["share-for-page"].includes(item.queryKey[0] as string),
+          ['share-for-page'].includes(item.queryKey[0] as string),
       });
 
       queryClient.invalidateQueries({
         predicate: (item) =>
-          ["share-list"].includes(item.queryKey[0] as string),
+          ['share-list'].includes(item.queryKey[0] as string),
       });
 
-      notifications.show({ message: t("Share deleted successfully") });
+      notifications.show({ message: t('Share deleted successfully') });
     },
     onError: (error) => {
-      if (error?.["status"] === 404) {
+      if (error?.['status'] === 404) {
         queryClient.removeQueries({
           predicate: (item) =>
-            ["share-for-page"].includes(item.queryKey[0] as string),
+            ['share-for-page'].includes(item.queryKey[0] as string),
         });
       }
 
       notifications.show({
-        message: error?.["response"]?.data?.message || "Failed to delete share",
-        color: "red",
+        message: error?.['response']?.data?.message || 'Failed to delete share',
+        color: 'red',
       });
     },
   });
@@ -170,10 +170,10 @@ export function useGetSharedPageTreeQuery(
   shareId: string,
 ): UseQueryResult<ISharedPageTree, Error> {
   return useQuery({
-    queryKey: ["shared-page-tree", shareId],
+    queryKey: ['shared-page-tree', shareId],
     queryFn: () => getSharedPageTree(shareId),
     enabled: !!shareId,
-    placeholderData: keepPreviousData,
-    staleTime: 60 * 60 * 1000,
+    staleTime: 5 * 60 * 1000, // Reduced to 5 minutes
+    refetchOnMount: 'always', // Always refetch when component mounts
   });
 }

@@ -7,7 +7,7 @@ import {
   useQuery,
   UseQueryResult,
   keepPreviousData,
-} from "@tanstack/react-query";
+} from '@tanstack/react-query';
 import {
   createPage,
   deletePage,
@@ -20,31 +20,31 @@ import {
   getAllSidebarPages,
   getDeletedPages,
   restorePage,
-} from "@/features/page/services/page-service";
+} from '@/features/page/services/page-service';
 import {
   IMovePage,
   IPage,
   IPageInput,
   SidebarPagesParams,
-} from "@/features/page/types/page.types";
-import { notifications } from "@mantine/notifications";
-import { IPagination, QueryParams } from "@/lib/types.ts";
-import { queryClient } from "@/main.tsx";
-import { buildTree } from "@/features/page/tree/utils";
-import { useEffect } from "react";
-import { validate as isValidUuid } from "uuid";
-import { useTranslation } from "react-i18next";
-import { useAtom } from "jotai";
-import { treeDataAtom } from "@/features/page/tree/atoms/tree-data-atom";
-import { SimpleTree } from "react-arborist";
-import { SpaceTreeNode } from "@/features/page/tree/types";
-import { useQueryEmit } from "@/features/websocket/use-query-emit";
+} from '@/features/page/types/page.types';
+import { notifications } from '@mantine/notifications';
+import { IPagination, QueryParams } from '@/lib/types.ts';
+import { queryClient } from '@/main.tsx';
+import { buildTree } from '@/features/page/tree/utils';
+import { useEffect } from 'react';
+import { validate as isValidUuid } from 'uuid';
+import { useTranslation } from 'react-i18next';
+import { useAtom } from 'jotai';
+import { treeDataAtom } from '@/features/page/tree/atoms/tree-data-atom';
+import { SimpleTree } from 'react-arborist';
+import { SpaceTreeNode } from '@/features/page/tree/types';
+import { useQueryEmit } from '@/features/websocket/use-query-emit';
 
 export function usePageQuery(
   pageInput: Partial<IPageInput>,
 ): UseQueryResult<IPage, Error> {
   const query = useQuery({
-    queryKey: ["pages", pageInput.pageId],
+    queryKey: ['pages', pageInput.pageId],
     queryFn: () => getPageById(pageInput),
     enabled: !!pageInput.pageId,
     staleTime: 5 * 60 * 1000,
@@ -53,9 +53,9 @@ export function usePageQuery(
   useEffect(() => {
     if (query.data) {
       if (isValidUuid(pageInput.pageId)) {
-        queryClient.setQueryData(["pages", query.data.slugId], query.data);
+        queryClient.setQueryData(['pages', query.data.slugId], query.data);
       } else {
-        queryClient.setQueryData(["pages", query.data.id], query.data);
+        queryClient.setQueryData(['pages', query.data.id], query.data);
       }
     }
   }, [query.data]);
@@ -71,24 +71,24 @@ export function useCreatePageMutation() {
       invalidateOnCreatePage(data);
     },
     onError: (error) => {
-      notifications.show({ message: t("Failed to create page"), color: "red" });
+      notifications.show({ message: t('Failed to create page'), color: 'red' });
     },
   });
 }
 
 export function updatePageData(data: IPage) {
-  const pageBySlug = queryClient.getQueryData<IPage>(["pages", data.slugId]);
-  const pageById = queryClient.getQueryData<IPage>(["pages", data.id]);
+  const pageBySlug = queryClient.getQueryData<IPage>(['pages', data.slugId]);
+  const pageById = queryClient.getQueryData<IPage>(['pages', data.id]);
 
   if (pageBySlug) {
-    queryClient.setQueryData(["pages", data.slugId], {
+    queryClient.setQueryData(['pages', data.slugId], {
       ...pageBySlug,
       ...data,
     });
   }
 
   if (pageById) {
-    queryClient.setQueryData(["pages", data.id], { ...pageById, ...data });
+    queryClient.setQueryData(['pages', data.id], { ...pageById, ...data });
   }
 
   invalidateOnUpdatePage(
@@ -127,15 +127,15 @@ export function useRemovePageMutation() {
   return useMutation({
     mutationFn: (pageId: string) => deletePage(pageId, false),
     onSuccess: (_, pageId) => {
-      notifications.show({ message: "Page moved to trash" });
+      notifications.show({ message: 'Page moved to trash' });
       invalidateOnDeletePage(pageId);
       queryClient.invalidateQueries({
         predicate: (item) =>
-          ["trash-list"].includes(item.queryKey[0] as string),
+          ['trash-list'].includes(item.queryKey[0] as string),
       });
     },
     onError: (error) => {
-      notifications.show({ message: "Failed to delete page", color: "red" });
+      notifications.show({ message: 'Failed to delete page', color: 'red' });
     },
   });
 }
@@ -145,17 +145,17 @@ export function useDeletePageMutation() {
   return useMutation({
     mutationFn: (pageId: string) => deletePage(pageId, true),
     onSuccess: (data, pageId) => {
-      notifications.show({ message: t("Page deleted successfully") });
+      notifications.show({ message: t('Page deleted successfully') });
       invalidateOnDeletePage(pageId);
 
       // Invalidate to refresh trash lists
       queryClient.invalidateQueries({
         predicate: (item) =>
-          ["trash-list"].includes(item.queryKey[0] as string),
+          ['trash-list'].includes(item.queryKey[0] as string),
       });
     },
     onError: (error) => {
-      notifications.show({ message: t("Failed to delete page"), color: "red" });
+      notifications.show({ message: t('Failed to delete page'), color: 'red' });
     },
   });
 }
@@ -176,7 +176,7 @@ export function useRestorePageMutation() {
   return useMutation({
     mutationFn: (pageId: string) => restorePage(pageId),
     onSuccess: async (restoredPage) => {
-      notifications.show({ message: "Page restored successfully" });
+      notifications.show({ message: 'Page restored successfully' });
 
       // Add the restored page back to the tree
       const treeApi = new SimpleTree<SpaceTreeNode>(treeData);
@@ -187,7 +187,7 @@ export function useRestorePageMutation() {
         const nodeData: SpaceTreeNode = {
           id: restoredPage.id,
           slugId: restoredPage.slugId,
-          name: restoredPage.title || "Untitled",
+          name: restoredPage.title || 'Untitled',
           icon: restoredPage.icon,
           position: restoredPage.position,
           spaceId: restoredPage.spaceId,
@@ -223,7 +223,7 @@ export function useRestorePageMutation() {
         // Emit websocket event to sync with other users
         setTimeout(() => {
           emit({
-            operation: "addTreeNode",
+            operation: 'addTreeNode',
             spaceId: restoredPage.spaceId,
             payload: {
               parentId,
@@ -238,11 +238,11 @@ export function useRestorePageMutation() {
 
       // Also invalidate deleted pages query to refresh the trash list
       await queryClient.invalidateQueries({
-        queryKey: ["trash-list", restoredPage.spaceId],
+        queryKey: ['trash-list', restoredPage.spaceId],
       });
     },
     onError: (error) => {
-      notifications.show({ message: "Failed to restore page", color: "red" });
+      notifications.show({ message: 'Failed to restore page', color: 'red' });
     },
   });
 }
@@ -251,7 +251,7 @@ export function useGetSidebarPagesQuery(
   data: SidebarPagesParams | null,
 ): UseInfiniteQueryResult<InfiniteData<IPagination<IPage>, unknown>> {
   return useInfiniteQuery({
-    queryKey: ["sidebar-pages", data],
+    queryKey: ['sidebar-pages', data],
     queryFn: ({ pageParam }) => getSidebarPages({ ...data, page: pageParam }),
     initialPageParam: 1,
     getPreviousPageParam: (firstPage) =>
@@ -263,7 +263,7 @@ export function useGetSidebarPagesQuery(
 
 export function useGetRootSidebarPagesQuery(data: SidebarPagesParams) {
   return useInfiniteQuery({
-    queryKey: ["root-sidebar-pages", data.spaceId],
+    queryKey: ['root-sidebar-pages', data.spaceId],
     queryFn: async ({ pageParam }) => {
       return getSidebarPages({ spaceId: data.spaceId, page: pageParam });
     },
@@ -279,7 +279,7 @@ export function usePageBreadcrumbsQuery(
   pageId: string,
 ): UseQueryResult<Partial<IPage[]>, Error> {
   return useQuery({
-    queryKey: ["breadcrumbs", pageId],
+    queryKey: ['breadcrumbs', pageId],
     queryFn: () => getPageBreadcrumbs(pageId),
     enabled: !!pageId,
   });
@@ -288,7 +288,7 @@ export function usePageBreadcrumbsQuery(
 export async function fetchAllAncestorChildren(params: SidebarPagesParams) {
   // not using a hook here, so we can call it inside a useEffect hook
   const response = await queryClient.fetchQuery({
-    queryKey: ["sidebar-pages", params],
+    queryKey: ['sidebar-pages', params],
     queryFn: () => getAllSidebarPages(params),
     staleTime: 30 * 60 * 1000,
   });
@@ -301,7 +301,7 @@ export function useRecentChangesQuery(
   spaceId?: string,
 ): UseQueryResult<IPagination<IPage>, Error> {
   return useQuery({
-    queryKey: ["recent-changes", spaceId],
+    queryKey: ['recent-changes', spaceId],
     queryFn: () => getRecentChanges(spaceId),
     refetchOnMount: true,
   });
@@ -312,7 +312,7 @@ export function useDeletedPagesQuery(
   params?: QueryParams,
 ): UseQueryResult<IPagination<IPage>, Error> {
   return useQuery({
-    queryKey: ["trash-list", spaceId, params],
+    queryKey: ['trash-list', spaceId, params],
     queryFn: () => getDeletedPages(spaceId, params),
     enabled: !!spaceId,
     placeholderData: keepPreviousData,
@@ -336,10 +336,10 @@ export function invalidateOnCreatePage(data: Partial<IPage>) {
 
   let queryKey: QueryKey = null;
   if (data.parentPageId === null) {
-    queryKey = ["root-sidebar-pages", data.spaceId];
+    queryKey = ['root-sidebar-pages', data.spaceId];
   } else {
     queryKey = [
-      "sidebar-pages",
+      'sidebar-pages',
       { pageId: data.parentPageId, spaceId: data.spaceId },
     ];
   }
@@ -368,7 +368,7 @@ export function invalidateOnCreatePage(data: Partial<IPage>) {
   if (data.parentPageId !== null) {
     //update sub sidebar pages haschildern
     const subSideBarMatches = queryClient.getQueriesData({
-      queryKey: ["sidebar-pages"],
+      queryKey: ['sidebar-pages'],
       exact: false,
     });
 
@@ -391,7 +391,7 @@ export function invalidateOnCreatePage(data: Partial<IPage>) {
 
     //update root sidebar pages haschildern
     const rootSideBarMatches = queryClient.getQueriesData({
-      queryKey: ["root-sidebar-pages", data.spaceId],
+      queryKey: ['root-sidebar-pages', data.spaceId],
       exact: false,
     });
 
@@ -415,7 +415,7 @@ export function invalidateOnCreatePage(data: Partial<IPage>) {
 
   //update recent changes
   queryClient.invalidateQueries({
-    queryKey: ["recent-changes", data.spaceId],
+    queryKey: ['recent-changes', data.spaceId],
   });
 }
 
@@ -428,9 +428,9 @@ export function invalidateOnUpdatePage(
 ) {
   let queryKey: QueryKey = null;
   if (parentPageId === null) {
-    queryKey = ["root-sidebar-pages", spaceId];
+    queryKey = ['root-sidebar-pages', spaceId];
   } else {
-    queryKey = ["sidebar-pages", { pageId: parentPageId, spaceId: spaceId }];
+    queryKey = ['sidebar-pages', { pageId: parentPageId, spaceId: spaceId }];
   }
   //update all sidebar pages
   queryClient.setQueryData<InfiniteData<IPagination<IPage>>>(
@@ -453,7 +453,7 @@ export function invalidateOnUpdatePage(
 
   //update recent changes
   queryClient.invalidateQueries({
-    queryKey: ["recent-changes", spaceId],
+    queryKey: ['recent-changes', spaceId],
   });
 }
 
@@ -461,11 +461,11 @@ export function invalidateOnMovePage() {
   //for move invalidate all sidebars for now (how to do???)
   //invalidate all root sidebar pages
   queryClient.invalidateQueries({
-    queryKey: ["root-sidebar-pages"],
+    queryKey: ['root-sidebar-pages'],
   });
   //invalidate all sub sidebar pages
   queryClient.invalidateQueries({
-    queryKey: ["sidebar-pages"],
+    queryKey: ['sidebar-pages'],
   });
   // ---
 }
@@ -474,8 +474,8 @@ export function invalidateOnDeletePage(pageId: string) {
   //update all sidebar pages
   const allSideBarMatches = queryClient.getQueriesData({
     predicate: (query) =>
-      query.queryKey[0] === "root-sidebar-pages" ||
-      query.queryKey[0] === "sidebar-pages",
+      query.queryKey[0] === 'root-sidebar-pages' ||
+      query.queryKey[0] === 'sidebar-pages',
   });
 
   allSideBarMatches.forEach(([key, d]) => {
@@ -493,8 +493,13 @@ export function invalidateOnDeletePage(pageId: string) {
     });
   });
 
+  // Invalidate shared page trees for all shares (unauthenticated users)
+  queryClient.invalidateQueries({
+    predicate: (query) => query.queryKey[0] === 'shared-page-tree',
+  });
+
   //update recent changes
   queryClient.invalidateQueries({
-    queryKey: ["recent-changes"],
+    queryKey: ['recent-changes'],
   });
 }
