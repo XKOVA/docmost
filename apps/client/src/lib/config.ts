@@ -8,7 +8,7 @@ declare global {
 }
 
 export function getAppName(): string {
-  return 'Docmost';
+  return 'XKOVA Documentation';
 }
 
 export function getAppUrl(): string {

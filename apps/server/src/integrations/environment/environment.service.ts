@@ -120,7 +120,10 @@ export class EnvironmentService {
   }
 
   getMailFromName(): string {
-    return this.configService.get<string>('MAIL_FROM_NAME', 'Docmost');
+    return this.configService.get<string>(
+      'MAIL_FROM_NAME',
+      'XKOVA Documentation',
+    );
   }
 
   getSmtpHost(): string {
